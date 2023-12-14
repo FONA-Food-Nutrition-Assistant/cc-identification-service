@@ -5,7 +5,7 @@ import {
 	HttpException,
 	Logger,
 } from '@nestjs/common';
-import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core';
+import { BaseExceptionFilter } from '@nestjs/core';
 import { ResponseMessage } from '../message/message.enum';
 import { ErrorMessage } from '../message/message.constant';
 import { ServerResponse } from 'http';
