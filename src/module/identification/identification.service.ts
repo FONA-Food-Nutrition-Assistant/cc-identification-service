@@ -1,8 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { RequestPredictFoodDto } from './dto/predict-food.dto';
-import { IdentificationModel } from '../../common/helper/identification/identification.ml';
 import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import axios from 'axios';
+
+import {
+	IdentificationModel,
+	PredictResultObj,
+} from '../../common/helper/identification/identification.ml';
+
+type FoodPrepObj = {
+	id: number;
+	name: string;
+	is_user_allergy: boolean;
+	nutritions: Array<any>;
+};
 
 @Injectable()
 export class IdentificationService {
@@ -14,14 +25,21 @@ export class IdentificationService {
 
 	async predictFood(params: RequestPredictFoodDto, image: MemoryStorageFile) {
 		try {
-			const predictionResult = await this.identificationModel.predict(
-				image.buffer,
-			);
+			const predictionResult: Array<PredictResultObj> =
+				await this.identificationModel.predict(image.buffer);
 
 			const foodReqPrep = predictionResult.map(food => food.label).join(',');
 			const foodPrep = await this.getFoodPrep(foodReqPrep, params.uid);
 
-			return foodPrep;
+			const data = foodReqPrep.split(',').reduce((acc, currFood) => {
+				const temp = foodPrep.filter(foodPrep =>
+					foodPrep.name.toLowerCase().includes(currFood),
+				);
+				acc.push(...temp);
+				return acc;
+			}, []);
+
+			return data;
 		} catch (error) {
 			throw error;
 		}
@@ -40,7 +58,7 @@ export class IdentificationService {
 					},
 				},
 			);
-			return res.data.data;
+			return res.data.data as Array<FoodPrepObj>;
 		} catch (error) {
 			throw new Error(error.response.data.message);
 		}

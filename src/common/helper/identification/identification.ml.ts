@@ -2,8 +2,13 @@ import * as tf from '@tensorflow/tfjs-node';
 import axios from 'axios';
 import * as sharp from 'sharp';
 
+export type PredictResultObj = {
+	label: string;
+	probability: number;
+};
+
 export class IdentificationModel {
-	private modeUrl = `${process.env.IDENTIFICATION_MODEL_URL}/model.json`;
+	private modelUrl = `${process.env.IDENTIFICATION_MODEL_URL}/model.json`;
 	private imgSize = 224;
 	private numOfClasses = 10;
 
@@ -12,17 +17,18 @@ export class IdentificationModel {
 
 	private async loadModel() {
 		try {
-			this.model = await tf.loadGraphModel(this.modeUrl);
+			this.model = await tf.loadGraphModel(this.modelUrl);
 			const res = await axios.get(
 				`${process.env.IDENTIFICATION_MODEL_URL}/pred-class.json`,
 			);
 			this.predClass = res.data;
 		} catch (error) {
+			console.log(error);
 			throw new Error('Failed to load model');
 		}
 	}
 
-	async predict(imageBuffer: Buffer) {
+	async predict(imageBuffer: Buffer): Promise<Array<PredictResultObj>> {
 		await this.loadModel();
 
 		const prepImage = await sharp(imageBuffer)
@@ -34,6 +40,8 @@ export class IdentificationModel {
 
 		const input = tf.node
 			.decodeImage(prepImage, 3)
+			.add(1)
+			.div(255)
 			.reshape([-1, this.imgSize, this.imgSize, 3])
 			.toFloat();
 
@@ -48,6 +56,6 @@ export class IdentificationModel {
 			.sort((a, b) => b.probability - a.probability)
 			.slice(0, this.numOfClasses);
 
-		return prepData;
+		return prepData as Array<PredictResultObj>;
 	}
 }
