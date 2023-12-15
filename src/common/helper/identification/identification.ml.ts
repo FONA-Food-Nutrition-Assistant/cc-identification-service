@@ -23,7 +23,6 @@ export class IdentificationModel {
 			);
 			this.predClass = res.data;
 		} catch (error) {
-			console.log(error);
 			throw new Error('Failed to load model');
 		}
 	}
