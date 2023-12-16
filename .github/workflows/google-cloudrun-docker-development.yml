@@ -51,7 +51,7 @@ jobs:
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
           SERVICE_REGION: ${{ secrets.SERVICE_REGION }}
           IDENTIFICATION_MODEL_URL: ${{ secrets.IDENTIFICATION_MODEL_URL }}
-          FONA_SERVICE_FOOD_URL: ${{ secrets.FONA_SERVICE_FOOD_URL }}
+          FOOD_SERVICE_URL: ${{ secrets.FOOD_SERVICE_URL }}
         run: |
           gcloud run deploy ${SERVICE_NAME} \
           --image="${ARTIFACT_REGISTRY}/${SERVICE_NAME}:${SERVICE_VERSION}" \
