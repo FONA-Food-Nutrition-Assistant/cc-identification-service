@@ -5,7 +5,7 @@ import {
 	HttpException,
 	Logger,
 } from '@nestjs/common';
-import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core';
+import { BaseExceptionFilter } from '@nestjs/core';
 import { ResponseMessage } from '../message/message.enum';
 import { ErrorMessage } from '../message/message.constant';
 import { ServerResponse } from 'http';
@@ -13,6 +13,8 @@ import { ServerResponse } from 'http';
 @Catch()
 export class AllExceptionsFilter extends BaseExceptionFilter {
 	catch(exception: any, host: ArgumentsHost): void {
+		Logger.error(exception.message, 'AllExceptionsFilter');
+
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse();
 		const request = ctx.getRequest();
