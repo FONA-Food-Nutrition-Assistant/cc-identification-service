@@ -32,19 +32,19 @@ export class IdentificationModel {
 
 		const prepImage = await sharp(imageBuffer)
 			.resize(this.imgSize, this.imgSize, {
-				fit: sharp.fit.contain,
-				background: { r: 255, g: 255, b: 255, alpha: 1 },
+				fit: sharp.fit.fill,
+				kernel: sharp.kernel.nearest,
 			})
 			.toBuffer();
 
 		const input = tf.node
 			.decodeImage(prepImage, 3)
-			.add(1)
 			.div(255)
+			.expandDims(0)
 			.reshape([-1, this.imgSize, this.imgSize, 3])
-			.toFloat();
+			.toFloat() as tf.Tensor3D;
 
-		const pred = this.model.predict(input) as tf.Tensor;
+		const pred = this.model.predict(input) as tf.Tensor3D;
 		const result = pred.dataSync();
 
 		const prepData = Array.from(result)
